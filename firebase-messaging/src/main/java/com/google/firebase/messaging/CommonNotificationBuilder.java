@@ -371,7 +371,7 @@ public final class CommonNotificationBuilder {
 
     PendingIntent contentIntent =
         PendingIntent.getActivity(
-            context, generatePendingIntentRequestCode(), intent, PendingIntent.FLAG_ONE_SHOT);
+            context, generatePendingIntentRequestCode(), intent, getPendingIntentFlags(PendingIntent.FLAG_ONE_SHOT));
 
     // We need to check metric options against the messageData bundle because we stripped the metric
     // options from the clientVisibleData version
@@ -539,7 +539,18 @@ public final class CommonNotificationBuilder {
             .setComponent(
                 new ComponentName(context, "com.google.firebase.iid.FirebaseInstanceIdReceiver"))
             .putExtra(IntentKeys.WRAPPED_INTENT, intent),
-        PendingIntent.FLAG_ONE_SHOT);
+        getPendingIntentFlags(PendingIntent.FLAG_ONE_SHOT));
+  }
+
+  /**
+   * Adds {@link PendingIntent#FLAG_IMMUTABLE} to a PendingIntent's flags since any PendingIntents
+   * used here don't need to be modified.
+   */
+  private static int getPendingIntentFlags(int baseFlags) {
+    // Only add on platform levels that support FLAG_IMMUTABLE.
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+        ? baseFlags | PendingIntent.FLAG_IMMUTABLE
+        : baseFlags;
   }
 
   /** Check whether we should upload metrics data. */
